@@ -157,12 +157,14 @@
         let description= $("#itemName").val();
         let qty= $("#itemQty").val();
         let unitPrice= $("#itemPrice").val();
+        let value=$("#itemQty").val();
 
-        itemAll={
+            itemAll={
             "code":code,
             "description":description,
             "qty":qty,
             "unitPrice":unitPrice,
+            "value":value
         }
 
         $.ajax({

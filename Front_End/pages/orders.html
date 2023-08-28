@@ -392,8 +392,9 @@
                     method: "post",
                     contentType:"application/json",
                     data:JSON.stringify(ordersAll),
-                    success: function () {
-                        alert("Order Success");
+                    success: function (resp) {
+                        alert(resp.message);
+                        // alert("Order Success");
                         $('#orderTable').empty();
                         let row = `<tr>
                     <td>${$("#txtItemCode").val()}</td>
@@ -415,7 +416,6 @@
                 alert("error...!");
             }
         });
-
     });
 
     // $('#btnSubmitOrder').keyup(function () {
