@@ -13,6 +13,10 @@ import java.sql.*;
 @WebServlet(urlPatterns = {"/pages/customer"})
 public class CustomerServletAPI extends HttpServlet {
 
+//    public CustomerServletAPI() {
+///*servelet ekakata req ennna kalin req catch karaganna plwan class ekak Filters wee.*/
+//    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { //QueryString Support,Formdata NotSupport,Json Support
 
@@ -21,7 +25,7 @@ public class CustomerServletAPI extends HttpServlet {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from Customer");
             ResultSet rst = pstm.executeQuery();
-             resp.addHeader("Content-Type","application/json");
+               resp.addHeader("Content-Type","application/json");/**/
                resp.addHeader("Access-Control-Allow-Origin","*");
 
 

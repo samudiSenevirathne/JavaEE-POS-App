@@ -65,7 +65,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
         String date = itemJsonObject.getString("date");
         String cusId = itemJsonObject.getString("cusId");
         String itemCode = itemJsonObject.getString("itemCode");
-        String qty = itemJsonObject.getString("qty");
+        String value = itemJsonObject.getString("value");
         String unitPrice = itemJsonObject.getString("unitPrice");
 
 
@@ -76,33 +76,40 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
             connection.setAutoCommit(false);
 
-//                ItemServletAPI itemServletAPI=new ItemServletAPI();
+                PreparedStatement pstm = connection.prepareStatement("insert into orders values(?,?,?)");
+                pstm.setObject(1, oid);
+                pstm.setObject(2, date);
+                pstm.setObject(3, cusId);
 
-                PreparedStatement pstm3 = connection.prepareStatement("insert into orders values(?,?,?)");
-                pstm3.setObject(1, oid);
-                pstm3.setObject(2, date);
-                pstm3.setObject(3, cusId);
+                PreparedStatement pstm1 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
+                pstm1.setObject(1, oid);
+                pstm1.setObject(2, itemCode);
+                pstm1.setObject(3, value);
+                pstm1.setObject(4, unitPrice);
 
-                PreparedStatement pstm4 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
-                pstm4.setObject(1, oid);
-                pstm4.setObject(2, itemCode);
-                pstm4.setObject(3, qty);
-                pstm4.setObject(4, unitPrice);
+                PreparedStatement pstm2 = connection.prepareStatement("update item set qtyOnHand=qtyOnHand-? where code=?");
+                pstm2.setObject(1, value);
+                pstm2.setObject(2, itemCode);
 
 
             resp.addHeader("Content-Type","application/json");
             resp.addHeader("Access-Control-Allow-Origin","*");
             resp.addHeader("Access-Control-Allow-Headers", "content-type");
 
-            if (pstm3.executeUpdate() > 0) {
-                if (pstm4.executeUpdate() > 0) {
-//                      itemServletAPI.doPut(req,resp);
-                    connection.commit();
-                    JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                    response.add("state", "OK");
-                    response.add("message", "Order Success....!");//Successfully Added
-                    response.add("data", "");
-                    resp.getWriter().print(response.build());
+            if (pstm.executeUpdate() > 0) {
+                if (pstm1.executeUpdate() > 0) {
+                    if (pstm2.executeUpdate() > 0) {
+                        connection.commit();
+                        JsonObjectBuilder response = Json.createObjectBuilder();//create object
+                        response.add("state", "OK");
+                        response.add("message", "Order Success....!");//Successfully Added
+                        response.add("data", "");
+                        resp.getWriter().print(response.build());
+                    }else {
+                        connection.rollback();
+                    }
+                }else {
+                    connection.rollback();
                 }
             }else{
                 connection.rollback();

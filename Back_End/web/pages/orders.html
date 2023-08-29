@@ -350,86 +350,49 @@
 
     }
 
+
     $('#btnSubmitOrder').click(function () {
-        let code=$("#txtItemCode").val();
-        let description= $("#txtItemDescription").val();
-        let qty= $('#txtQTYOnHand').val()
-        let unitPrice= $("#txtItemPrice").val();
-        let value=  $('#txtQty').val();
 
+                let oid=$("#txtOrderID").val();
+                let date= $("#txtDate").val();
+                let cusId= $("#orderCustomerID").val();
+                let itemcode=$("#txtItemCode").val();
+                let unitPrice= $("#txtItemPrice").val();
+                let value=  $('#txtQty').val();
 
-        itemAll={
-            "code":code,
-            "description":description,
-            "qty":qty,
-            "unitPrice":unitPrice,
-            "value":value
-        }
+                ordersAll={
+                    "oid":oid,
+                    "date":date,
+                    "cusId":cusId,
+                    "itemCode":itemcode,
+                    "unitPrice":unitPrice,
+                    "value":value
+                }
 
-        $.ajax({
-            url:"item",
-            method: "put",
-            contentType:"application/json",
-            data:JSON.stringify(itemAll),
-            success: function () {
-                            let oid=$("#txtOrderID").val();
-                            let date= $("#txtDate").val();
-                            let cusId= $("#orderCustomerID").val();
-                            let itemcode=$("#txtItemCode").val();
-                            let qty= $("#txtQty").val();
-                            let unitPrice= $("#txtItemPrice").val();
-
-                            ordersAll={
-                                "oid":oid,
-                                "date":date,
-                                "cusId":cusId,
-                                "itemCode":itemcode,
-                                "qty":qty,
-                                "unitPrice":unitPrice
-                            }
-
-                            $.ajax({
-                                    url:"orders",
-                                    method: "post",
-                                    contentType:"application/json",
-                                    data:JSON.stringify(ordersAll),
-                                    success: function () {
-                                        alert("Order Success");
-                                        $('#orderTable').empty();
-                                        let row = `<tr>
+                $.ajax({
+                    url:"orders",
+                    method: "post",
+                    contentType:"application/json",
+                    data:JSON.stringify(ordersAll),
+                    success: function (resp) {
+                        alert(resp.message);
+                        $('#orderTable').empty();
+                        let row = `<tr>
                     <td>${$("#txtItemCode").val()}</td>
                     <td>${$("#txtItemDescription").val()}</td>
                     <td>${$("#txtItemPrice").val()}</td>
                     <td>${$("#txtQty").val()}</td>
                     <td>${$("#cash").val()}</td>
                     </tr>`;
-                                        $('#orderTable').append(row);
-                                    }
-                                ,
-                                error: function () {
-                                    alert("error...!");
-                                }
-                            });
-                        }
-                        ,
-                        error: function () {
-                            alert("error...!");
-                        }
-                    });
+                        $('#orderTable').append(row);
+                    }
+                    ,
+                    error: function (error) {
+                        alert(error.responseJSON.message);
+                    }
+                });
 
     });
-
-    // $('#btnSubmitOrder').keyup(function () {
-    //     $('#orderTable').empty();
-    //     let row = `<tr>
-    //                 <td>${$("#txtItemCode").val()}</td>
-    //                 <td>${$("#txtItemDescription").val()}</td>
-    //                 <td>${$("#txtItemPrice").val()}</td>
-    //                 <td>${$("#txtQty").val()}</td>
-    //                 <td>${$("#cash").val()}</td>
-    //                 </tr>`;
-    //     $('#orderTable').append(row);
-    // });
 
 
 </script>

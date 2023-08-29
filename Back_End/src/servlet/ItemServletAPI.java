@@ -98,22 +98,13 @@ public class ItemServletAPI extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         JsonReader reader = Json.createReader(req.getReader());
         JsonObject itemJsonObject = reader.readObject();
         String code = itemJsonObject.getString("code");
         String itemName = itemJsonObject.getString("description");
         String qty = itemJsonObject.getString("qty");
         String unitPrice = itemJsonObject.getString("unitPrice");
-        String value=itemJsonObject.getString("value");
-         if(qty.equals(value)) {
 
-         }else{
-             int q = Integer.parseInt(qty);
-             int v = Integer.parseInt(value);
-             int diff = q - v;
-             qty = String.valueOf(diff);
-         }
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -190,4 +181,5 @@ public class ItemServletAPI extends HttpServlet {
         resp.addHeader("Access-Control-Allow-Methods", "PUT,DELETE");
         resp.addHeader("Access-Control-Allow-Headers", "content-type");
     }
+
 }
