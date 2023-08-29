@@ -13,10 +13,6 @@ import java.sql.*;
 @WebServlet(urlPatterns = {"/pages/customer"})
 public class CustomerServletAPI extends HttpServlet {
 
-//    public CustomerServletAPI() {
-///*servelet ekakata req ennna kalin req catch karaganna plwan class ekak Filters wee.*/
-//    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { //QueryString Support,Formdata NotSupport,Json Support
 
