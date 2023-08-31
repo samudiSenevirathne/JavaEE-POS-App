@@ -314,13 +314,25 @@
     });
 
 
+    let tempTotal =0;
+
     $('#btnAddToTable').click(function () {
         let QtyOnHand = +$('#txtQTYOnHand').val();
         let qty = +$('#txtQty').val();
         if (QtyOnHand >= qty) {
             let total = qty * $('#txtItemPrice').val();
-            $('#total').text(total);
-            $('#subtotal').text(total);
+            tempTotal=total+tempTotal;
+            $('#total').text(tempTotal);
+            $('#subtotal').text(tempTotal);
+            // $('#orderTable').empty();
+            let row = `<tr>
+                    <td>${$("#txtItemCode").val()}</td>
+                    <td>${$("#txtItemDescription").val()}</td>
+                    <td>${$("#txtItemPrice").val()}</td>
+                    <td>${$("#txtQty").val()}</td>
+                    <td>${$("#txtItemPrice").val() * $("#txtQty").val()}</td>
+                    </tr>`;
+            $('#orderTable').append(row);
         }
     });
 
@@ -330,16 +342,14 @@
     });
 
     function calculateTotal() {
-        let qty = +$('#txtQty').val();
-        let total = qty * $('#txtItemPrice').val();
         let discount = +$('#discount').val();
         let subTotal;
         if (discount >= 0) {
-            subTotal = total - discount;
+            subTotal = tempTotal - discount;
             $('#subtotal').text(subTotal);
         } else {
-            subTotal = total;
-            $('#subTotal').text(total);
+            subTotal = tempTotal;
+            $('#subTotal').text(tempTotal);
         }
         let cash = +$('#cash').val();
         if (cash > 0) {
@@ -347,7 +357,6 @@
         } else {
             $('#balance').val(0);
         }
-
     }
 
     $('#btnSubmitOrder').click(function () {
@@ -375,15 +384,6 @@
             data:JSON.stringify(ordersAll),
             success: function (resp) {
                 alert(resp.message);
-                $('#orderTable').empty();
-                let row = `<tr>
-                    <td>${$("#txtItemCode").val()}</td>
-                    <td>${$("#txtItemDescription").val()}</td>
-                    <td>${$("#txtItemPrice").val()}</td>
-                    <td>${$("#txtQty").val()}</td>
-                    <td>${$("#cash").val()}</td>
-                    </tr>`;
-                $('#orderTable').append(row);
             }
             ,
             error: function (error) {
