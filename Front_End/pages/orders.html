@@ -133,6 +133,7 @@
                                         <div class="form-group">
                                             <label class="">QtyOnH :</label>
                                             <input class="form-control" id="txtQTYOnHand" type="text">
+<!--                                            <span class="control-error" id="order-qty-empty-error"></span>-->
                                         </div>
                                     </div>
                                     <hr>
@@ -141,7 +142,7 @@
                                         <div class="form-group">
                                             <label>Order Quantity :</label>
                                             <input class="form-control" id="txtQty" min="1" type="number">
-                                            <span class="control-error" id="order-qty-empty-error"></span>
+<!--                                            <span class="control-error" id="order-qty-empty-error"></span>-->
                                         </div>
                                     </div>
                                 </div>
@@ -250,6 +251,9 @@
     }
 
     $('#cmbCustomers').change(function () {
+        $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty,#cash,#discount,#balance').val("");
+        $('#total,#subtotal').text("00.0");
+        $('#orderTable').empty();
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/customer",
             success: function (resp) {
@@ -298,6 +302,7 @@
     }
 
     $('#cmbItems').change(function () {
+        $('#txtQty').val("");
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
             success: function (resp) {
@@ -309,31 +314,54 @@
                         $('#txtItemPrice').val(item.unitPrice);
                     }
                 }
+                if($('#txtQTYOnHand').val()==0) {
+                    $('#txtQTYOnHand').css("border", "1px solid red");
+                }else{
+                    $('#txtQTYOnHand').css("border", "1px solid lightgray");
+                }
             }
         });
     });
 
 
+
     let tempTotal =0;
+    let itemArray=[];//
+    let orderDetailArray=[];  //
+
+
 
     $('#btnAddToTable').click(function () {
-        let QtyOnHand = +$('#txtQTYOnHand').val();
-        let qty = +$('#txtQty').val();
-        if (QtyOnHand >= qty) {
-            let total = qty * $('#txtItemPrice').val();
-            tempTotal=total+tempTotal;
-            $('#total').text(tempTotal);
-            $('#subtotal').text(tempTotal);
-            // $('#orderTable').empty();
-            let row = `<tr>
+        // orderDetailArray.push($("#txtOrderID").val());
+        // if ($("#txtOrderID").val() != orderDetailArray[0]) {
+        //     itemArray = [];
+        //     orderDetailArray = [];
+        // }
+             let QtyOnHand = +$('#txtQTYOnHand').val();
+             let qty = +$('#txtQty').val();
+             if (QtyOnHand >= qty) {
+                 let total = qty * $('#txtItemPrice').val();
+                 tempTotal = total + tempTotal;
+                 $('#total').text(tempTotal);
+                 $('#subtotal').text(tempTotal);
+                 // $('#orderTable').empty();
+                 let row = `<tr>
                     <td>${$("#txtItemCode").val()}</td>
                     <td>${$("#txtItemDescription").val()}</td>
                     <td>${$("#txtItemPrice").val()}</td>
                     <td>${$("#txtQty").val()}</td>
                     <td>${$("#txtItemPrice").val() * $("#txtQty").val()}</td>
                     </tr>`;
-            $('#orderTable').append(row);
-        }
+                 $('#orderTable').append(row);
+                 orderDetailArray.push({o_id:$("#txtOrderID").val(),itemCode_:$("#txtItemCode").val(),value_:$("#txtQty").val(),unitPrice:$("#txtItemPrice").val()});
+                 itemArray.push({val_ue:$("#txtQty").val(),item_code:$("#txtItemCode").val()});
+             }else{
+                 alert("Check stoke!!!!!!!!!")
+                 $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty').val("");
+             }
+
+
+
     });
 
 
@@ -364,17 +392,12 @@
         let oid=$("#txtOrderID").val();
         let date= $("#txtDate").val();
         let cusId= $("#orderCustomerID").val();
-        let itemcode=$("#txtItemCode").val();
-        let unitPrice= $("#txtItemPrice").val();
-        let value=  $('#txtQty').val();
-
         ordersAll={
             "oid":oid,
             "date":date,
             "cusId":cusId,
-            "itemCode":itemcode,
-            "unitPrice":unitPrice,
-            "value":value
+            "orderDetailArray":orderDetailArray,
+            "itemArray":itemArray
         }
 
         $.ajax({
@@ -384,6 +407,10 @@
             data:JSON.stringify(ordersAll),
             success: function (resp) {
                 alert(resp.message);
+                setOrderID();
+                $('#orderCustomerID,#orderCustomerName,#orderCustomerAddress,#orderCustomerSalary,#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty,#cash,#discount,#balance').val("");
+                $('#total,#subtotal').text("00.0");
+                $('#orderTable').empty();
             }
             ,
             error: function (error) {

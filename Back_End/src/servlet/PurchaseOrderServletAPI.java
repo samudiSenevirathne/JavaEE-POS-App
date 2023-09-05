@@ -60,19 +60,23 @@ public class PurchaseOrderServletAPI extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         JsonReader reader = Json.createReader(req.getReader());
-        JsonObject itemJsonObject = reader.readObject();
-        String oid = itemJsonObject.getString("oid");
-        String date = itemJsonObject.getString("date");
-        String cusId = itemJsonObject.getString("cusId");
-        String itemCode = itemJsonObject.getString("itemCode");
-        String value = itemJsonObject.getString("value");
-        String unitPrice = itemJsonObject.getString("unitPrice");
+        JsonObject JsonObject = reader.readObject();
+        String oid = JsonObject.getString("oid");
+        String date = JsonObject.getString("date");
+        String cusId = JsonObject.getString("cusId");
+        JsonArray orderDetailArray=JsonObject.getJsonArray("orderDetailArray");
+        JsonArray itemArray = JsonObject.getJsonArray("itemArray");
+
+        resp.addHeader("Content-Type","application/json");
+        resp.addHeader("Access-Control-Allow-Origin","*");
+        resp.addHeader("Access-Control-Allow-Headers", "content-type");
 
 
         try {
 
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+
 
             connection.setAutoCommit(false);
 
@@ -81,42 +85,51 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 pstm.setObject(2, date);
                 pstm.setObject(3, cusId);
 
-                PreparedStatement pstm1 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
-                pstm1.setObject(1, oid);
-                pstm1.setObject(2, itemCode);
-                pstm1.setObject(3, value);
-                pstm1.setObject(4, unitPrice);
+            if (!(pstm.executeUpdate() > 0)) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                throw new SQLException("order cannot be insert");
+            }
 
-                PreparedStatement pstm2 = connection.prepareStatement("update item set qtyOnHand=qtyOnHand-? where code=?");
-                pstm2.setObject(1, value);
-                pstm2.setObject(2, itemCode);
+                for(JsonValue orderDetail:orderDetailArray) {
+                    JsonObject jsonObject = orderDetail.asJsonObject();
+                    PreparedStatement pstm1 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
+                        pstm1.setObject(1, jsonObject.getString("o_id"));
+                        pstm1.setObject(2, jsonObject.getString("itemCode_"));
+                        pstm1.setObject(3, jsonObject.getString("value_"));
+                        pstm1.setObject(4, jsonObject.getString("unitPrice"));
 
+                    if (!(pstm1.executeUpdate() > 0)) {
+                        connection.rollback();
+                        connection.setAutoCommit(true);
+                        throw new SQLException("orderDetail cannot be insert");
+                    }
 
-            resp.addHeader("Content-Type","application/json");
-            resp.addHeader("Access-Control-Allow-Origin","*");
-            resp.addHeader("Access-Control-Allow-Headers", "content-type");
+                }
 
-            if (pstm.executeUpdate() > 0) {
-                if (pstm1.executeUpdate() > 0) {
-                    if (pstm2.executeUpdate() > 0) {
+                for(JsonValue itemDetail:itemArray) {
+                   JsonObject jsonObject = itemDetail.asJsonObject();
+                    PreparedStatement pstm2 = connection.prepareStatement("update item set qtyOnHand=qtyOnHand-? where code=?");
+                        pstm2.setObject(1,Integer.parseInt(jsonObject.getString("val_ue")));
+                        pstm2.setObject(2, jsonObject.getString("item_code"));
+
+                    if (!(pstm2.executeUpdate() > 0)) {
+                        connection.rollback();
+                        connection.setAutoCommit(true);
+                        throw new SQLException("Item cannot be updated");
+                    }
+
+                }
+
                         connection.commit();
                         JsonObjectBuilder response = Json.createObjectBuilder();//create object
                         response.add("state", "OK");
                         response.add("message", "Order Success....!");//Successfully Added
                         response.add("data", "");
                         resp.getWriter().print(response.build());
-                    }else {
-                        connection.rollback();
-                    }
-                }else {
-                    connection.rollback();
-                }
-            }else{
-                connection.rollback();
-            }
+
 
         } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
             JsonObjectBuilder response = Json.createObjectBuilder();//create object
             response.add("state", "Error");
             response.add("message", e.getMessage());
