@@ -304,19 +304,32 @@
         });
     }
 
+
     $('#cmbItems').change(function () {
         $('#txtQty').val("");
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
             success: function (resp) {
                 for (let item of resp.data) {
-                    if($('#cmbItems').val()==item.description){
+                    if ($('#cmbItems').val() == item.description) {
                         $('#txtItemCode').val(item.code);
                         $('#txtItemDescription').val(item.description);
                         $('#txtQTYOnHand').val(item.qty);
                         $('#txtItemPrice').val(item.unitPrice);
                     }
                 }
+                    /*new*/ /* temporary update for QTYOnHand(on my view) */
+                    let rows = $("#orderTable").children().length;
+                    for (let i = 0; i < rows; i++) {
+                        let item_Code = $("#orderTable").children().eq(i).children(":eq(0)").text();
+                        if (item_Code ==$('#txtItemCode').val()) {
+                            let item_Qty = parseInt($("#orderTable").children().eq(i).children(":eq(3)").text());
+                               $('#txtQTYOnHand').val(parseInt($('#txtQTYOnHand').val())-item_Qty);
+                               break;
+                        }
+                    }
+                    /*new*/
+
                 if($('#txtQTYOnHand').val()==0) {
                     $('#txtQTYOnHand').css("border", "1px solid red");
                 }else{
@@ -347,7 +360,7 @@
             let rows = $("#orderTable").children().length;
          for (let i = 0; i < rows; i++) {
              let item_Code = $("#orderTable").children().eq(i).children(":eq(0)").text();
-             if (item_Code == $("#txtItemCode").val()) {
+              if (item_Code == $("#txtItemCode").val()) {
                  let item_Qty = parseInt($("#orderTable").children().eq(i).children(":eq(3)").text());
                  item_Qty += parseInt($("#txtQty").val());
                  let item_total = item_Qty*parseInt($("#txtItemPrice").val());
@@ -391,6 +404,10 @@
          itemArray.push({val_ue: $("#txtQty").val(), item_code: $("#txtItemCode").val()});
           condition=1;
      }
+            /*new*/
+                 // $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty').val("");  /*no need*/
+             /*new*/
+
              }else{
                  alert("Check stoke!!!!!!!!!");
                  $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty').val("");
