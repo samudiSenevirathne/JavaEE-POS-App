@@ -250,9 +250,12 @@
         });
     }
 
+    let tempTotal = 0;
+
     $('#cmbCustomers').change(function () {
         $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty,#cash,#discount,#balance').val("");
         $('#total,#subtotal').text("00.0");
+        tempTotal = 0;
         $('#orderTable').empty();
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/customer",
@@ -325,44 +328,82 @@
 
 
 
-    let tempTotal =0;
+    // let tempTotal =0;
     let itemArray=[];//
     let orderDetailArray=[];  //
 
-
-
     $('#btnAddToTable').click(function () {
-        // orderDetailArray.push($("#txtOrderID").val());
-        // if ($("#txtOrderID").val() != orderDetailArray[0]) {
-        //     itemArray = [];
-        //     orderDetailArray = [];
-        // }
-             let QtyOnHand = +$('#txtQTYOnHand').val();
-             let qty = +$('#txtQty').val();
+        let condition=0;
+             let QtyOnHand = parseInt($('#txtQTYOnHand').val());
+             let qty = parseInt($('#txtQty').val());
              if (QtyOnHand >= qty) {
-                 let total = qty * $('#txtItemPrice').val();
+                 let total = qty * parseInt($('#txtItemPrice').val());
                  tempTotal = total + tempTotal;
                  $('#total').text(tempTotal);
                  $('#subtotal').text(tempTotal);
-                 // $('#orderTable').empty();
-                 let row = `<tr>
+
+
+            /*Start*/    /*updated same code qty*/
+            let rows = $("#orderTable").children().length;
+         for (let i = 0; i < rows; i++) {
+             let item_Code = $("#orderTable").children().eq(i).children(":eq(0)").text();
+             if (item_Code == $("#txtItemCode").val()) {
+                 let item_Qty = parseInt($("#orderTable").children().eq(i).children(":eq(3)").text());
+                 item_Qty += parseInt($("#txtQty").val());
+                 let item_total = item_Qty*parseInt($("#txtItemPrice").val());
+                 $("#orderTable").children().eq(i).children(":eq(3)").text(item_Qty + "");
+                 $("#orderTable").children().eq(i).children(":eq(4)").text(item_total + "");
+                 for (od of orderDetailArray) {
+                     if (od.itemCode_ === $("#txtItemCode").val()) {
+                         let od_val_num = parseInt(od.value_);
+                         od_val_num += parseInt($("#txtQty").val());
+                         od.value_ = od_val_num + "";
+                     }
+                 }
+                 for (it of itemArray) {
+                     if (it.item_code === $("#txtItemCode").val()) {
+                         let it_val_num = parseInt(it.val_ue);
+                         it_val_num += parseInt($("#txtQty").val());
+                         it.val_ue = it_val_num + "";
+                     }
+                 }
+                 condition=1;
+                 break;
+             }
+         }
+         /*End*/    /*updated same code qty*/
+
+     while (condition==0) {
+         let row = `<tr>
                     <td>${$("#txtItemCode").val()}</td>
                     <td>${$("#txtItemDescription").val()}</td>
                     <td>${$("#txtItemPrice").val()}</td>
                     <td>${$("#txtQty").val()}</td>
                     <td>${$("#txtItemPrice").val() * $("#txtQty").val()}</td>
                     </tr>`;
-                 $('#orderTable').append(row);
-                 orderDetailArray.push({o_id:$("#txtOrderID").val(),itemCode_:$("#txtItemCode").val(),value_:$("#txtQty").val(),unitPrice:$("#txtItemPrice").val()});
-                 itemArray.push({val_ue:$("#txtQty").val(),item_code:$("#txtItemCode").val()});
+         $('#orderTable').append(row);
+         orderDetailArray.push({
+             o_id: $("#txtOrderID").val(),
+             itemCode_: $("#txtItemCode").val(),
+             value_: $("#txtQty").val(),
+             unitPrice: $("#txtItemPrice").val()
+         });
+         itemArray.push({val_ue: $("#txtQty").val(), item_code: $("#txtItemCode").val()});
+          condition=1;
+     }
              }else{
-                 alert("Check stoke!!!!!!!!!")
+                 alert("Check stoke!!!!!!!!!");
                  $('#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty').val("");
              }
 
-
-
     });
+
+    setDates();
+
+    function setDates() {
+        let date = new Date().toJSON().split("T")[0];
+        $("#txtDate").val(date);
+    }
 
 
     $('#cash,#discount').keyup(function () {
@@ -408,6 +449,7 @@
             success: function (resp) {
                 alert(resp.message);
                 setOrderID();
+                setDates();
                 $('#orderCustomerID,#orderCustomerName,#orderCustomerAddress,#orderCustomerSalary,#txtItemCode,#txtItemDescription,#txtQTYOnHand,#txtItemPrice,#txtQty,#cash,#discount,#balance').val("");
                 $('#total,#subtotal').text("00.0");
                 $('#orderTable').empty();
