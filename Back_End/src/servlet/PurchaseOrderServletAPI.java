@@ -1,8 +1,10 @@
 package servlet;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import util.ResponseUtil;
 
 import javax.json.*;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,9 +19,9 @@ public class PurchaseOrderServletAPI extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { //QueryString Support,Formdata NotSupport,Json Support
 
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
+        try(Connection connection = pool.getConnection()) {  //used try-resources
             PreparedStatement pstm = connection.prepareStatement("select * from orders");
             ResultSet rst = pstm.executeQuery();
 
@@ -41,7 +43,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Loaded....!",allOrders.build()));
 
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
@@ -59,13 +61,10 @@ public class PurchaseOrderServletAPI extends HttpServlet {
         JsonArray orderDetailArray=JsonObject.getJsonArray("orderDetailArray");
         JsonArray itemArray = JsonObject.getJsonArray("itemArray");
 
-
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-
-
+            Connection connection = pool.getConnection();
             connection.setAutoCommit(false);
 
                 PreparedStatement pstm = connection.prepareStatement("insert into orders values(?,?,?)");
@@ -110,22 +109,15 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 }
 
                         connection.commit();
+                        connection.setAutoCommit(true);
                         //create the response Object
                         resp.getWriter().print(ResponseUtil.getJson("OK","Order Success....!"));
 
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
-        }finally {
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-                connection.setAutoCommit(true);
-            } catch (SQLException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
         }
 
     }

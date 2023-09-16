@@ -1,8 +1,10 @@
 package servlet;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import util.ResponseUtil;
 
 import javax.json.*;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,9 +18,10 @@ public class ItemServletAPI extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
+        try(Connection connection = pool.getConnection()) {  //used try-resources
             PreparedStatement pstm = connection.prepareStatement("select * from Item");
             ResultSet rst = pstm.executeQuery();
 
@@ -42,7 +45,7 @@ public class ItemServletAPI extends HttpServlet {
             resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Loaded....!",allItems.build()));
 
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
@@ -56,10 +59,9 @@ public class ItemServletAPI extends HttpServlet {
         String qty = req.getParameter("qty");
         String unitPrice = req.getParameter("unitPrice");
 
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
+        try(Connection connection = pool.getConnection()) {  //used try-resources
                     PreparedStatement pstm = connection.prepareStatement("insert into Item values(?,?,?,?)");
                     pstm.setObject(1, code);
                     pstm.setObject(2, itemName);
@@ -72,7 +74,7 @@ public class ItemServletAPI extends HttpServlet {
                     }
 
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
@@ -88,11 +90,9 @@ public class ItemServletAPI extends HttpServlet {
         String qty = itemJsonObject.getString("qty");
         String unitPrice = itemJsonObject.getString("unitPrice");
 
-
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
+        try(Connection connection = pool.getConnection()) {  //used try-resources
             PreparedStatement pstm = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
             pstm.setObject(1, itemName);
             pstm.setObject(2, qty);
@@ -104,7 +104,7 @@ public class ItemServletAPI extends HttpServlet {
                 resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Updated....!"));
             }
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
@@ -115,10 +115,9 @@ public class ItemServletAPI extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String code = req.getParameter("code");
 
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-
+        ServletContext servletContext = getServletContext();
+        BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
+        try(Connection connection = pool.getConnection()) {  //used try-resources
             PreparedStatement pstm = connection.prepareStatement("delete from Item where code=?");
             pstm.setObject(1, code);
 
@@ -127,12 +126,11 @@ public class ItemServletAPI extends HttpServlet {
                 resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Deleted....!"));
             }
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             //create the response Object
             resp.setStatus(500);
             resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
     }
-
 
 }
