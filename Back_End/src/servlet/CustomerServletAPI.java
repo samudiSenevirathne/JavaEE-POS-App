@@ -65,7 +65,6 @@ public class CustomerServletAPI extends HttpServlet {
 
             CustomerDTO customerDTO=new CustomerDTO(cusID,cusName,cusAddress,cusSalary);
 
-
                 if (customerBO.saveCustomer(connection,customerDTO)) {
                     //create the response Object
                     resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Added....!"));

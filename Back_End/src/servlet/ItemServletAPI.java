@@ -1,5 +1,8 @@
 package servlet;
 
+import bo.BOFactory;
+import bo.custom.ItemBO;
+import dto.ItemDTO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import util.ResponseUtil;
 
@@ -12,9 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 
 @WebServlet(urlPatterns = {"/pages/item"})
 public class ItemServletAPI extends HttpServlet {
+
+    private final ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBo(BOFactory.BOType.ITEM);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -22,22 +28,16 @@ public class ItemServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) {  //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("select * from Item");
-            ResultSet rst = pstm.executeQuery();
 
+            ArrayList<ItemDTO> itemDTOS = itemBO.loadAllItems(connection);
 
             JsonArrayBuilder allItems = Json.createArrayBuilder();//create array
-            while (rst.next()) {
-                String code = rst.getString(1);
-                String name = rst.getString(2);
-                int qtyOnHand = rst.getInt(3);
-                double unitPrice = rst.getDouble(4);
-
+            for(ItemDTO idto:itemDTOS) {
                 JsonObjectBuilder itemObject = Json.createObjectBuilder();//create Object
-                    itemObject.add("code",code);
-                    itemObject.add("description",name);
-                    itemObject.add("qty",qtyOnHand);
-                    itemObject.add("unitPrice",unitPrice);
+                    itemObject.add("code",idto.getCode());
+                    itemObject.add("description",idto.getDescription());
+                    itemObject.add("qty",idto.getQtyOnHand());
+                    itemObject.add("unitPrice",idto.getUnitPrice());
                     allItems.add(itemObject.build());
             }
 
@@ -62,13 +62,10 @@ public class ItemServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) {  //used try-resources
-                    PreparedStatement pstm = connection.prepareStatement("insert into Item values(?,?,?,?)");
-                    pstm.setObject(1, code);
-                    pstm.setObject(2, itemName);
-                    pstm.setObject(3, qty);
-                    pstm.setObject(4, unitPrice);
 
-                    if (pstm.executeUpdate() > 0) {
+            ItemDTO itemDTO=new ItemDTO(code,itemName,Integer.parseInt(qty),Double.parseDouble(unitPrice));
+
+                    if (itemBO.saveItem(connection,itemDTO)) {
                         //create the response Object
                         resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Added....!"));
                     }
@@ -93,13 +90,10 @@ public class ItemServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) {  //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
-            pstm.setObject(1, itemName);
-            pstm.setObject(2, qty);
-            pstm.setObject(3, unitPrice);
-            pstm.setObject(4, code);
 
-            if (pstm.executeUpdate() > 0) {
+            ItemDTO itemDTO=new ItemDTO(code,itemName,Integer.parseInt(qty),Double.parseDouble(unitPrice));
+
+            if (itemBO.editItem(connection,itemDTO)) {
                 //create the response Object
                 resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Updated....!"));
             }
@@ -118,10 +112,8 @@ public class ItemServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) {  //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("delete from Item where code=?");
-            pstm.setObject(1, code);
 
-            if (pstm.executeUpdate() > 0) {
+            if (itemBO.deleteItem(connection,code)) {
                 //create the response Object
                 resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Deleted....!"));
             }
