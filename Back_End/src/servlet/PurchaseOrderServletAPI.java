@@ -75,6 +75,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             if (!(pstm.executeUpdate() > 0)) {
                 connection.rollback();
                 connection.setAutoCommit(true);
+                connection.close();
                 throw new SQLException("order cannot be insert");
             }
 
@@ -89,6 +90,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                     if (!(pstm1.executeUpdate() > 0)) {
                         connection.rollback();
                         connection.setAutoCommit(true);
+                        connection.close();
                         throw new SQLException("orderDetail cannot be insert");
                     }
 
@@ -103,6 +105,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                     if (!(pstm2.executeUpdate() > 0)) {
                         connection.rollback();
                         connection.setAutoCommit(true);
+                        connection.close();
                         throw new SQLException("Item cannot be updated");
                     }
 
@@ -110,6 +113,7 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
                         connection.commit();
                         connection.setAutoCommit(true);
+                        connection.close();
                         //create the response Object
                         resp.getWriter().print(ResponseUtil.getJson("OK","Order Success....!"));
 
