@@ -21,8 +21,6 @@ public class ItemServletAPI extends HttpServlet {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from Item");
             ResultSet rst = pstm.executeQuery();
-            resp.addHeader("Content-Type","application/json");
-            resp.addHeader("Access-Control-Allow-Origin","*");
 
 
             JsonArrayBuilder allItems = Json.createArrayBuilder();//create array
@@ -67,8 +65,6 @@ public class ItemServletAPI extends HttpServlet {
                     pstm.setObject(2, itemName);
                     pstm.setObject(3, qty);
                     pstm.setObject(4, unitPrice);
-                    resp.addHeader("Content-Type", "application/json");
-                    resp.addHeader("Access-Control-Allow-Origin","*");
 
                     if (pstm.executeUpdate() > 0) {
                         //create the response Object
@@ -102,9 +98,6 @@ public class ItemServletAPI extends HttpServlet {
             pstm.setObject(2, qty);
             pstm.setObject(3, unitPrice);
             pstm.setObject(4, code);
-            resp.addHeader("Content-Type","application/json");
-            resp.addHeader("Access-Control-Allow-Origin","*");
-            resp.addHeader("Access-Control-Allow-Headers","content-type");
 
             if (pstm.executeUpdate() > 0) {
                 //create the response Object
@@ -128,8 +121,6 @@ public class ItemServletAPI extends HttpServlet {
 
             PreparedStatement pstm = connection.prepareStatement("delete from Item where code=?");
             pstm.setObject(1, code);
-            resp.addHeader("Content-Type","application/json");
-            resp.addHeader("Access-Control-Allow-Origin","*");
 
             if (pstm.executeUpdate() > 0) {
                 //create the response Object
@@ -143,11 +134,5 @@ public class ItemServletAPI extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.addHeader("Access-Control-Allow-Origin", "*");
-        resp.addHeader("Access-Control-Allow-Methods", "PUT,DELETE");
-        resp.addHeader("Access-Control-Allow-Headers", "content-type");
-    }
 
 }

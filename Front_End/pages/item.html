@@ -116,6 +116,9 @@
         $("#tblItem").empty();
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success:function (resp){
                 console.log(resp.message);
                 for(let item of resp.data){
@@ -136,6 +139,9 @@
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
             method: "post",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             data:formData,
             success: function (resp) {
                 alert(resp.message);
@@ -170,6 +176,9 @@
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
             method: "put",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             contentType:"application/json",
             data:JSON.stringify(itemAll),
             success: function (resp) {
@@ -196,6 +205,9 @@
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item?code="+code,
             method: "delete",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 alert(resp.message);
                 clearInputFields();

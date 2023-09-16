@@ -23,9 +23,6 @@ public class CustomerServletAPI extends HttpServlet {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from Customer");
             ResultSet rst = pstm.executeQuery();
-               resp.addHeader("Content-Type","application/json");/**/
-               resp.addHeader("Access-Control-Allow-Origin","*");
-
 
 
             JsonArrayBuilder allCustomers = Json.createArrayBuilder();//create array
@@ -70,8 +67,6 @@ public class CustomerServletAPI extends HttpServlet {
                 pstm.setObject(2, cusName);
                 pstm.setObject(3, cusAddress);
                 pstm.setObject(4, cusSalary);
-                resp.addHeader("Content-Type", "application/json");/*if you want to alert in json you have to use it again(my point) !!!*/
-                resp.addHeader("Access-Control-Allow-Origin","*");
 
                 if (pstm.executeUpdate() > 0) {
                     //create the response Object
@@ -103,9 +98,6 @@ public class CustomerServletAPI extends HttpServlet {
                     pstm.setObject(1, cusName);
                     pstm.setObject(2, cusAddress);
                     pstm.setObject(3, cusSalary);
-                    resp.addHeader("Content-Type","application/json");/*if you want to alert in json you have to use it again(my point) !!!*/
-            resp.addHeader("Access-Control-Allow-Origin","*");
-            resp.addHeader("Access-Control-Allow-Headers","content-type");
 
 
                     if (pstm.executeUpdate() > 0) {
@@ -130,9 +122,6 @@ public class CustomerServletAPI extends HttpServlet {
 
             PreparedStatement pstm = connection.prepareStatement("delete from Customer where id=?");
                     pstm.setObject(1, id);
-                    resp.addHeader("Content-Type","application/json");/*if you want to alert in json you have to use it again(my point) !!!*/
-                    resp.addHeader("Access-Control-Allow-Origin","*");
-
 
                     if (pstm.executeUpdate() > 0) {
                         //create the response Object
@@ -146,10 +135,4 @@ public class CustomerServletAPI extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.addHeader("Access-Control-Allow-Origin", "*");
-        resp.addHeader("Access-Control-Allow-Methods", "PUT,DELETE");
-        resp.addHeader("Access-Control-Allow-Headers", "content-type");
-    }
 }

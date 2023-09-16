@@ -22,9 +22,6 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from orders");
             ResultSet rst = pstm.executeQuery();
-            resp.addHeader("Content-Type","application/json");
-            resp.addHeader("Access-Control-Allow-Origin","*");
-
 
 
             JsonArrayBuilder allOrders = Json.createArrayBuilder();//create array
@@ -61,10 +58,6 @@ public class PurchaseOrderServletAPI extends HttpServlet {
         String cusId = JsonObject.getString("cusId");
         JsonArray orderDetailArray=JsonObject.getJsonArray("orderDetailArray");
         JsonArray itemArray = JsonObject.getJsonArray("itemArray");
-
-        resp.addHeader("Content-Type","application/json");
-        resp.addHeader("Access-Control-Allow-Origin","*");
-        resp.addHeader("Access-Control-Allow-Headers", "content-type");
 
 
         try {
@@ -137,9 +130,4 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
     }
 
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.addHeader("Access-Control-Allow-Origin", "*");
-        resp.addHeader("Access-Control-Allow-Headers", "content-type");
-    }
 }

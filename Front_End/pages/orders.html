@@ -241,6 +241,9 @@
     function setCustomersName() {
         $.ajax({
             url: "http://localhost:8080/backEnd/pages/customer",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 for (let customer of resp.data) {
                     let row =`<option>${customer.name}</option>`;
@@ -259,6 +262,9 @@
         $('#orderTable').empty();
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/customer",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 for (let customer of resp.data) {
                     if($('#cmbCustomers').val()==customer.name){
@@ -279,6 +285,9 @@
         var o_id="";
         $.ajax({
             url: "http://localhost:8080/backEnd/pages/orders",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 for (let od of resp.data) {
                     o_id=od.oid;
@@ -295,6 +304,9 @@
     function setItemsName() {
         $.ajax({
             url: "http://localhost:8080/backEnd/pages/item",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 for (let item of resp.data) {
                     let row =`<option>${item.description}</option>`;
@@ -309,6 +321,9 @@
         $('#txtQty').val("");
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/item",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             success: function (resp) {
                 for (let item of resp.data) {
                     if ($('#cmbItems').val() == item.description) {
@@ -461,6 +476,9 @@
         $.ajax({
             url:"http://localhost:8080/backEnd/pages/orders",
             method: "post",
+            headers:{
+                Auth:"user=samuDi,pass=samu@123"
+            },
             contentType:"application/json",
             data:JSON.stringify(ordersAll),
             success: function (resp) {
