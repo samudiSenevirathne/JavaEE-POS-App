@@ -1,6 +1,8 @@
 package servlet;
 
 
+import util.ResponseUtil;
+
 import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,25 +42,16 @@ public class CustomerServletAPI extends HttpServlet {
                 customerObject.add("salary", salary);
                 allCustomers.add(customerObject.build());
             }
-//               resp.getWriter().print(allCustomers.build());
 
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "OK");
-            response.add("message", "Successfully Loaded....!");
-            response.add("data", allCustomers.build());
-            resp.getWriter().print(response.build());
+            //create the response Object
+             resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Loaded....!",allCustomers.build()));
 
 
         } catch (ClassNotFoundException | SQLException e) {
-//            throw new RuntimeException(e);
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
-
     }
 
     @Override
@@ -81,21 +74,14 @@ public class CustomerServletAPI extends HttpServlet {
                 resp.addHeader("Access-Control-Allow-Origin","*");
 
                 if (pstm.executeUpdate() > 0) {
-                    JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                    response.add("state", "OK");
-                    response.add("message", "Successfully Added....!");
-                    response.add("data", "");
-                    resp.getWriter().print(response.build());
+                    //create the response Object
+                    resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Added....!"));
                 }
-//            }
 
             } catch(ClassNotFoundException | SQLException e){
-                JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                response.add("state", "Error");
-                response.add("message", e.getMessage());
-                response.add("data", "");
-                resp.setStatus(400);
-                resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
             }
         }
 
@@ -112,33 +98,25 @@ public class CustomerServletAPI extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
 
-            PreparedStatement pstm3 = connection.prepareStatement("update Customer set name=?,address=?,salary=? where id=?");
-                    pstm3.setObject(4, cusID);
-                    pstm3.setObject(1, cusName);
-                    pstm3.setObject(2, cusAddress);
-                    pstm3.setObject(3, cusSalary);
+            PreparedStatement pstm = connection.prepareStatement("update Customer set name=?,address=?,salary=? where id=?");
+                    pstm.setObject(4, cusID);
+                    pstm.setObject(1, cusName);
+                    pstm.setObject(2, cusAddress);
+                    pstm.setObject(3, cusSalary);
                     resp.addHeader("Content-Type","application/json");/*if you want to alert in json you have to use it again(my point) !!!*/
             resp.addHeader("Access-Control-Allow-Origin","*");
             resp.addHeader("Access-Control-Allow-Headers","content-type");
 
 
-                    if (pstm3.executeUpdate() > 0) {
-                        JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                        response.add("state", "OK");
-                        response.add("message", "Successfully Updated....!");
-                        response.add("data", "");
-                        resp.getWriter().print(response.build());
+                    if (pstm.executeUpdate() > 0) {
+                        //create the response Object
+                        resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Updated....!"));
                     }
 
         } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-                        JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                        response.add("state", "Error");
-                        response.add("message", e.getMessage());// e.getLocalizedMessage()
-                        response.add("data", "");
-                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);//400
-                        resp.getWriter().print(response.build());
-
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
     }
 
@@ -150,28 +128,21 @@ public class CustomerServletAPI extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
 
-            PreparedStatement pstm2 = connection.prepareStatement("delete from Customer where id=?");
-                    pstm2.setObject(1, id);
+            PreparedStatement pstm = connection.prepareStatement("delete from Customer where id=?");
+                    pstm.setObject(1, id);
                     resp.addHeader("Content-Type","application/json");/*if you want to alert in json you have to use it again(my point) !!!*/
                     resp.addHeader("Access-Control-Allow-Origin","*");
 
 
-                    if (pstm2.executeUpdate() > 0) {
-                        JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                        response.add("state", "OK");
-                        response.add("message", "Successfully Deleted....!");
-                        response.add("data", "");
-                        resp.getWriter().print(response.build());
+                    if (pstm.executeUpdate() > 0) {
+                        //create the response Object
+                        resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Deleted....!"));
                     }
 
         } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
     }
 

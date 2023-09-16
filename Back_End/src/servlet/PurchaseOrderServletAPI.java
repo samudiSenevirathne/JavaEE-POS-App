@@ -1,5 +1,7 @@
 package servlet;
 
+import util.ResponseUtil;
+
 import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -38,21 +40,14 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 allOrders.add(orderObject.build());
             }
 
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "OK");
-            response.add("message", "Successfully Loaded....!");
-            response.add("data", allOrders.build());
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Loaded....!",allOrders.build()));
 
 
         } catch (ClassNotFoundException | SQLException e) {
-//            throw new RuntimeException(e);
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
 
     }
@@ -122,20 +117,14 @@ public class PurchaseOrderServletAPI extends HttpServlet {
                 }
 
                         connection.commit();
-                        JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                        response.add("state", "OK");
-                        response.add("message", "Order Success....!");//Successfully Added
-                        response.add("data", "");
-                        resp.getWriter().print(response.build());
+                        //create the response Object
+                        resp.getWriter().print(ResponseUtil.getJson("OK","Order Success....!"));
 
 
         } catch (ClassNotFoundException | SQLException e) {
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }finally {
             try {
                 Class.forName("com.mysql.jdbc.Driver");

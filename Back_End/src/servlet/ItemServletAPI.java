@@ -1,5 +1,7 @@
 package servlet;
 
+import util.ResponseUtil;
+
 import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -38,23 +40,15 @@ public class ItemServletAPI extends HttpServlet {
                     allItems.add(itemObject.build());
             }
 
-            JsonObjectBuilder response = Json.createObjectBuilder();//create Object
-            response.add("state", "OK");
-            response.add("message", "Successfully Loaded....!");
-            response.add("data", allItems.build());
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Loaded....!",allItems.build()));
 
 
         } catch (ClassNotFoundException | SQLException e) {
-//            throw new RuntimeException(e);
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
-
     }
 
     @Override
@@ -77,22 +71,15 @@ public class ItemServletAPI extends HttpServlet {
                     resp.addHeader("Access-Control-Allow-Origin","*");
 
                     if (pstm.executeUpdate() > 0) {
-                        JsonObjectBuilder response =  Json.createObjectBuilder();//create object
-                        response.add("state", "OK");
-                        response.add("message", "Successfully Added....!");
-                        response.add("data", "");
-                        resp.getWriter().print(response.build());
+                        //create the response Object
+                        resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Added....!"));
                     }
 
 
         } catch (ClassNotFoundException | SQLException e) {
-//            throw new RuntimeException(e);
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
     }
 
@@ -110,34 +97,25 @@ public class ItemServletAPI extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
 
-            PreparedStatement pstm3 = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
-            pstm3.setObject(1, itemName);
-            pstm3.setObject(2, qty);
-            pstm3.setObject(3, unitPrice);
-            pstm3.setObject(4, code);
+            PreparedStatement pstm = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
+            pstm.setObject(1, itemName);
+            pstm.setObject(2, qty);
+            pstm.setObject(3, unitPrice);
+            pstm.setObject(4, code);
             resp.addHeader("Content-Type","application/json");
             resp.addHeader("Access-Control-Allow-Origin","*");
             resp.addHeader("Access-Control-Allow-Headers","content-type");
 
-            if (pstm3.executeUpdate() > 0) {
-                JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                response.add("state", "OK");
-                response.add("message", "Successfully Updated....!");
-                response.add("data", "");
-                resp.getWriter().print(response.build());
+            if (pstm.executeUpdate() > 0) {
+                //create the response Object
+                resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Updated....!"));
             }
 
-
         } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
-
     }
 
     @Override
@@ -148,31 +126,21 @@ public class ItemServletAPI extends HttpServlet {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
 
-            PreparedStatement pstm2 = connection.prepareStatement("delete from Item where code=?");
-            pstm2.setObject(1, code);
+            PreparedStatement pstm = connection.prepareStatement("delete from Item where code=?");
+            pstm.setObject(1, code);
             resp.addHeader("Content-Type","application/json");
             resp.addHeader("Access-Control-Allow-Origin","*");
 
-
-            if (pstm2.executeUpdate() > 0) {
-                JsonObjectBuilder response = Json.createObjectBuilder();//create object
-                response.add("state", "OK");
-                response.add("message", "Successfully Deleted....!");
-                response.add("data", "");
-                resp.getWriter().print(response.build());
+            if (pstm.executeUpdate() > 0) {
+                //create the response Object
+                resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Deleted....!"));
             }
 
-
         } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-            JsonObjectBuilder response = Json.createObjectBuilder();//create object
-            response.add("state", "Error");
-            response.add("message", e.getMessage());
-            response.add("data", "");
-            resp.setStatus(400);
-            resp.getWriter().print(response.build());
+            //create the response Object
+            resp.setStatus(500);
+            resp.getWriter().print(ResponseUtil.getJson("Error",e.getMessage()));
         }
-
     }
 
     @Override
