@@ -1,6 +1,9 @@
 package servlet;
 
 
+import bo.BOFactory;
+import bo.custom.CustomerBO;
+import dto.CustomerDTO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import util.ResponseUtil;
 
@@ -13,30 +16,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 
 @WebServlet(urlPatterns = {"/pages/customer"})
 public class CustomerServletAPI extends HttpServlet {
+
+    private final CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBo(BOFactory.BOType.CUSTOMER);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { //QueryString Support,Formdata NotSupport,Json Support
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()){  //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("select * from Customer");
-            ResultSet rst = pstm.executeQuery();
+
+            ArrayList<CustomerDTO> customerDTOS = customerBO.loadAllCustomers(connection);
 
             JsonArrayBuilder allCustomers = Json.createArrayBuilder();//create array
-            while (rst.next()) {
-                String id = rst.getString(1);
-                String name = rst.getString(2);
-                String address = rst.getString(3);
-                String salary = rst.getString(4);
-
+           for(CustomerDTO cdto:customerDTOS){
                 JsonObjectBuilder customerObject = Json.createObjectBuilder();//create object
-                customerObject.add("id", id);
-                customerObject.add("name", name);
-                customerObject.add("address", address);
-                customerObject.add("salary", salary);
+                customerObject.add("id", cdto.getId());
+                customerObject.add("name", cdto.getName());
+                customerObject.add("address", cdto.getAddress());
+                customerObject.add("salary", cdto.getSalary());
                 allCustomers.add(customerObject.build());
             }
 
@@ -61,13 +62,11 @@ public class CustomerServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) { //used try-resources
-                PreparedStatement pstm = connection.prepareStatement("insert into Customer values(?,?,?,?)");
-                pstm.setObject(1, cusID);
-                pstm.setObject(2, cusName);
-                pstm.setObject(3, cusAddress);
-                pstm.setObject(4, cusSalary);
 
-                if (pstm.executeUpdate() > 0) {
+            CustomerDTO customerDTO=new CustomerDTO(cusID,cusName,cusAddress,cusSalary);
+
+
+                if (customerBO.saveCustomer(connection,customerDTO)) {
                     //create the response Object
                     resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Added....!"));
                 }
@@ -91,14 +90,10 @@ public class CustomerServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) { //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("update Customer set name=?,address=?,salary=? where id=?");
-                    pstm.setObject(4, cusID);
-                    pstm.setObject(1, cusName);
-                    pstm.setObject(2, cusAddress);
-                    pstm.setObject(3, cusSalary);
 
+            CustomerDTO customerDTO=new CustomerDTO(cusID,cusName,cusAddress,cusSalary);
 
-                    if (pstm.executeUpdate() > 0) {
+                    if (customerBO.editCustomer(connection,customerDTO)) {
                         //create the response Object
                         resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Updated....!"));
                     }
@@ -117,10 +112,8 @@ public class CustomerServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try (Connection connection = pool.getConnection()){ //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("delete from Customer where id=?");
-                    pstm.setObject(1, id);
 
-                    if (pstm.executeUpdate() > 0) {
+                    if (customerBO.deleteCustomer(connection,id)) {
                         //create the response Object
                         resp.getWriter().print(ResponseUtil.getJson("OK","Successfully Deleted....!"));
                     }
