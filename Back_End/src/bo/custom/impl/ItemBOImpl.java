@@ -41,6 +41,6 @@ public class ItemBOImpl implements ItemBO {
 
     @Override
     public boolean editItemQty(Connection connection, ItemDTO i) throws SQLException {
-        return itemDAO.update(connection,new Item(i.getCode(),i.getQtyOnHand()));
+        return itemDAO.updateQty(connection,new Item(i.getCode(),i.getQtyOnHand()));
     }
 }
