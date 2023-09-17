@@ -13,6 +13,11 @@ public class Item {
         this.unitPrice = unitPrice;
     }
 
+    public Item(String code, int qtyOnHand) {
+        this.code = code;
+        this.qtyOnHand = qtyOnHand;
+    }
+
     public String getCode() {
         return code;
     }

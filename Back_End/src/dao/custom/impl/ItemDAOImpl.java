@@ -45,4 +45,10 @@ public class ItemDAOImpl implements ItemDAO {
         }
         return list;
     }
+
+    @Override
+    public boolean updateQty(Connection connection, Item i) throws SQLException {
+        String sql="update item set qtyOnHand=qtyOnHand-? where code=?";
+        return SQLUtil.execute(connection,sql,i.getQtyOnHand(),i.getCode());
+    }
 }

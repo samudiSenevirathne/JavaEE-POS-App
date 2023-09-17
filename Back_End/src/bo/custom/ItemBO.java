@@ -18,4 +18,6 @@ public interface ItemBO extends SuperBO {
 
     ArrayList<ItemDTO> loadAllItems(Connection connection) throws SQLException;
 
+    boolean editItemQty(Connection connection,ItemDTO i) throws SQLException;
+
 }

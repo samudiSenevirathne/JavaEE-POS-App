@@ -19,7 +19,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 
     @Override
     public boolean delete(Connection connection,String id) throws SQLException {
-        String sql="delete from Item where code=?";
+        String sql="delete from Customer where id=?";
         return SQLUtil.execute(connection,sql,id);
     }
 

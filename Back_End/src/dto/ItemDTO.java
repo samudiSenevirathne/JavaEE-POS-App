@@ -13,6 +13,11 @@ public class ItemDTO {
         this.unitPrice = unitPrice;
     }
 
+    public ItemDTO(String code, int qtyOnHand) {
+        this.code = code;
+        this.qtyOnHand = qtyOnHand;
+    }
+
     public String getCode() {
         return code;
     }

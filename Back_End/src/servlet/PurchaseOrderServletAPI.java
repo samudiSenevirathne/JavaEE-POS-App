@@ -1,5 +1,12 @@
 package servlet;
 
+import bo.BOFactory;
+import bo.custom.ItemBO;
+import bo.custom.OrderBO;
+import bo.custom.OrderDetailBO;
+import dto.ItemDTO;
+import dto.OrderDTO;
+import dto.OrderDetailDTO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import util.ResponseUtil;
 
@@ -12,9 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 
 @WebServlet(urlPatterns = {"/pages/orders"})
 public class PurchaseOrderServletAPI extends HttpServlet {
+
+    private final OrderBO orderBO = (OrderBO) BOFactory.getBoFactory().getBo(BOFactory.BOType.ORDER);
+    private final OrderDetailBO orderDetailBO = (OrderDetailBO) BOFactory.getBoFactory().getBo(BOFactory.BOType.ORDER_DETAIL);
+    private final ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBo(BOFactory.BOType.ITEM);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { //QueryString Support,Formdata NotSupport,Json Support
@@ -22,20 +34,15 @@ public class PurchaseOrderServletAPI extends HttpServlet {
         ServletContext servletContext = getServletContext();
         BasicDataSource pool = (BasicDataSource) servletContext.getAttribute("dbcp");
         try(Connection connection = pool.getConnection()) {  //used try-resources
-            PreparedStatement pstm = connection.prepareStatement("select * from orders");
-            ResultSet rst = pstm.executeQuery();
 
+            ArrayList<OrderDTO> orderDTOS = orderBO.loadAllIOrders(connection);
 
             JsonArrayBuilder allOrders = Json.createArrayBuilder();//create array
-            while (rst.next()) {
-                String oid = rst.getString(1);
-                String date = rst.getString(2);
-                String cusId = rst.getString(3);
-
+               for(OrderDTO odto:orderDTOS){
                 JsonObjectBuilder orderObject = Json.createObjectBuilder();//create object
-                orderObject.add("oid", oid);
-                orderObject.add("date", date);
-                orderObject.add("cusId", cusId);
+                orderObject.add("oid", odto.getOid());
+                orderObject.add("date", odto.getDate());
+                orderObject.add("cusId", odto.getCustomerID());
                 allOrders.add(orderObject.build());
             }
 
@@ -67,12 +74,9 @@ public class PurchaseOrderServletAPI extends HttpServlet {
             Connection connection = pool.getConnection();
             connection.setAutoCommit(false);
 
-                PreparedStatement pstm = connection.prepareStatement("insert into orders values(?,?,?)");
-                pstm.setObject(1, oid);
-                pstm.setObject(2, date);
-                pstm.setObject(3, cusId);
+            OrderDTO orderDTO=new OrderDTO(oid,date,cusId);
 
-            if (!(pstm.executeUpdate() > 0)) {
+            if (!(orderBO.saveOrder(connection,orderDTO))) {
                 connection.rollback();
                 connection.setAutoCommit(true);
                 connection.close();
@@ -81,13 +85,10 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
                 for(JsonValue orderDetail:orderDetailArray) {
                     JsonObject jsonObject = orderDetail.asJsonObject();
-                    PreparedStatement pstm1 = connection.prepareStatement("insert into orderdetails values(?,?,?,?)");
-                        pstm1.setObject(1, jsonObject.getString("o_id"));
-                        pstm1.setObject(2, jsonObject.getString("itemCode_"));
-                        pstm1.setObject(3, jsonObject.getString("value_"));
-                        pstm1.setObject(4, jsonObject.getString("unitPrice"));
 
-                    if (!(pstm1.executeUpdate() > 0)) {
+                    OrderDetailDTO orderDetailDTO=new OrderDetailDTO(jsonObject.getString("o_id"),jsonObject.getString("itemCode_"),Integer.parseInt(jsonObject.getString("value_")),Double.parseDouble(jsonObject.getString("unitPrice")));
+
+                    if (!(orderDetailBO.saveOrderDetail(connection,orderDetailDTO))) {
                         connection.rollback();
                         connection.setAutoCommit(true);
                         connection.close();
@@ -98,11 +99,10 @@ public class PurchaseOrderServletAPI extends HttpServlet {
 
                 for(JsonValue itemDetail:itemArray) {
                    JsonObject jsonObject = itemDetail.asJsonObject();
-                    PreparedStatement pstm2 = connection.prepareStatement("update item set qtyOnHand=qtyOnHand-? where code=?");
-                        pstm2.setObject(1,Integer.parseInt(jsonObject.getString("val_ue")));
-                        pstm2.setObject(2, jsonObject.getString("item_code"));
 
-                    if (!(pstm2.executeUpdate() > 0)) {
+                    ItemDTO itemDTO=new ItemDTO(jsonObject.getString("item_code"),Integer.parseInt(jsonObject.getString("val_ue")));
+
+                    if (!(itemBO.editItemQty(connection,itemDTO))) {
                         connection.rollback();
                         connection.setAutoCommit(true);
                         connection.close();
